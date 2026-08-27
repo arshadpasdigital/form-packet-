@@ -1,0 +1,31 @@
+import fs from "node:fs"
+
+const siteUrl = (process.env.VITE_SITE_URL ?? "https://formpack.app").replace(
+  /\/$/,
+  ""
+)
+const source = fs.readFileSync(
+  new URL("../src/seo-data.ts", import.meta.url),
+  "utf8"
+)
+const slugs = [...source.matchAll(/slug:\s*"([^"]+)"/g)].map(
+  (match) => match[1]
+)
+const paths = [
+  "/",
+  "/guides",
+  ...slugs.map((slug) => `/guides/${slug}`),
+  "/privacy",
+  "/limitations",
+]
+const urls = paths
+  .map((path) => `  <url><loc>${siteUrl}${path}</loc></url>`)
+  .join("\n")
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`
+
+fs.writeFileSync(new URL("../public/sitemap.xml", import.meta.url), sitemap)
+fs.writeFileSync(
+  new URL("../public/robots.txt", import.meta.url),
+  `User-agent: *\nAllow: /\n\nSitemap: ${siteUrl}/sitemap.xml\n`
+)
+console.log(`Generated sitemap with ${paths.length} URLs.`)
