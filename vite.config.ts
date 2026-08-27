@@ -13,7 +13,7 @@ export default defineConfig({
         ).replace(/\/$/, "")
         return html.replaceAll("https://formpack.app", siteUrl)
       },
-      closeBundle() {
+      writeBundle() {
         generateStaticSeoPages()
       },
     },
